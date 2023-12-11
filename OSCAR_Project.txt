@@ -1,0 +1,24 @@
+SELECT * WHERE {
+ ?type dcterms:source nm:oscar;
+       nmo:hasEndDate ?date FILTER (?date >= "0850"^^xsd:gYear).
+} ORDER BY ASC (xsd:string(?date)) LIMIT 100
+
+SELECT * WHERE {
+ ?type dcterms:source nm:oscar;
+       nmo:hasEndDate ?date .
+  OPTIONAL { ?type nmo:hasWeight ?weight }.
+} ORDER BY ASC (xsd:string(?date)) LIMIT 200
+
+hat OSCAR kein weight?
+
+zeigt alle TypeSeries
+SELECT ?uri ?label WHERE {
+?uri a  nmo:TypeSeries;
+  skos:prefLabel ?label ;
+FILTER(langMatches(lang(?label), "EN"))
+}
+
+SELECT * WHERE {
+ ?type dcterms:source nm:ocre;
+       nmo:hasEndDate ?date FILTER (?date >= "0850"^^xsd:gYear).
+} ORDER BY ASC (xsd:string(?date)) LIMIT 100
