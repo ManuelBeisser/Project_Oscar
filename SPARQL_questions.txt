@@ -1,0 +1,36 @@
+SELECT ?coin WHERE {
+  ?coin nmo:hasAuthority nm:maria_theresa.
+} LIMIT 100
+
+	vs
+SELECT ?coin WHERE {
+  ?coin nmo:hasAuthority nm:augustus.
+} LIMIT 100
+		
+///
+
+SELECT ?type WHERE {
+?type nmo:hasDenomination nm:taler .
+}
+
+	vs.
+SELECT ?type WHERE {
+?type nmo:hasDenomination nm:denarius .
+} LIMIT 100
+
+///
+
+SELECT * WHERE {
+ ?coin nmo:hasReferenceWork nm:igch;
+       a nmo:NumismaticObject .
+} LIMIT 100
+
+///
+warum ist ReferenceWork eine Superclass von TypeSeries, wenn beide unterschiedliche Class Instances haben??
+https://nomisma.hypotheses.org/2486 - ReferenceWork
+https://nomisma.hypotheses.org/2400 - TypeSeries
+
+///
+
+	
+
