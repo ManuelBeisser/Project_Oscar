@@ -1,0 +1,250 @@
+PREFIX crm:  <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX dcterms:  <http://purl.org/dc/terms/>
+PREFIX dcmitype:  <http://purl.org/dc/dcmitype/>
+PREFIX foaf:  <http://xmlns.com/foaf/0.1/>
+PREFIX geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX nm:  <http://nomisma.org/id/>
+PREFIX nmo:  <http://nomisma.org/ontology#>
+PREFIX org:  <http://www.w3.org/ns/org#>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+PREFIX crro:	<http://numismatics.org/crro/id/>
+PREFIX oscar: 	<https://oscar.nationalmuseum.ch/id/>
+
+
+SELECT ?type ?label WHERE {
+ ?type dcterms:source nm:oscar;
+       nmo:hasMint ?mint.
+ ?mint skos:prefLabel ?label .
+FILTER langMatches(lang(?label), "en") 
+} ORDER BY ?label LIMIT 200
+
+--///
+
+SELECT ?label (count(?mint) as ?count) WHERE {
+ ?type dcterms:source nm:oscar;
+       nmo:hasMint ?mint.
+ ?mint skos:prefLabel ?label .
+FILTER langMatches(lang(?label), "en") .
+} ORDER BY ?label LIMIT 200
+
+--geht nicht 
+
+SELECT ?label (count(?mint) as ?count) WHERE {
+?type dcterms:source nm:oscar ;
+  nmo:hasMint ?mint .
+?mint skos:prefLabel ?label .
+FILTER langMatches(lang(?label), "en") 
+} GROUP BY ?label ORDER by ?label
+
+--geht - alle mints
+
+SELECT ?type WHERE {
+?type nmo:hasMint nm:baar.
+} LIMIT 100
+
+--alle typen
+
+
+SELECT * WHERE {
+?objects nmo:hasTypeSeriesObject crro:oscar.16;
+	 a ?type.
+} LIMIT 100
+
+--geht nicht - eigtl für alle objekte, aber crro nur für Rom, was für OSCAR?; oft keine Objekte verknüpft, oscar.16 hat 2 Tremissis
+
+-- mints haben kein start und end date? stattdessen nach ?type startDate und EndDate filtern?
+SELECT ?type ?date WHERE {
+?type dcterms:source nm:oscar;
+	  nmo:hasStartDate ?date.
+      FILTER ( ?date >= "1138"^^xsd:gYear && ?date <= "1350"^^xsd:gYear ) .
+  } ORDER BY ?date 
+
+SELECT ?type ?date WHERE {
+?type dcterms:source nm:oscar; 
+      nmo:hasMint nm:solothurn;
+	  nmo:hasStartDate ?date.
+FILTER ( ?date >= "1138"^^xsd:gYear && ?date <= "1350"^^xsd:gYear ) .
+  } ORDER BY ?date 
+-- geht, es ist dcterms:Source nicht :hasSource
+
+SELECT ?type ?mint ?date WHERE {
+?type dcterms:source nm:oscar;
+	  nmo:hasStartDate ?date;
+      nmo:hasMint ?mint.
+?mint skos:prefLabel ?label.
+		FILTER langMatches(lang(?label), "en") 
+      FILTER ( ?date >= "1138"^^xsd:gYear && ?date <= "1350"^^xsd:gYear ) .
+  } ORDER BY ?date 
+
+--diskrepanz durch start vs. endDate?
+
+--find all authorities - geht nicht
+SELECT ?label (count(?auth) as ?count) WHERE {
+?type dcterms:source nm:oscar ;
+  nmo:hasAuthority ?auth .
+?auth skos:prefLabel ?label .
+FILTER langMatches(lang(?label), "en") 
+} GROUP BY ?label ORDER by ?label
+
+--mit definiertem Oscar-Namespace: gibt zu type objekte mit weight aus
+SELECT * WHERE {
+?objects nmo:hasTypeSeriesItem oscar:oscar.148;
+  a ?type;
+    nmo:hasWeight ?weight.
+}
+
+--subquery mit objects, type und weight
+SELECT ?objects ?type ?weight
+WHERE {
+?objects nmo:hasTypeSeriesItem ?type;
+    nmo:hasWeight ?weight.
+{
+  SELECT ?type 
+  WHERE {
+  ?type dcterms:source nm:oscar;
+        nmo:hasStartDate ?date;
+        nmo:hasMint ?mint.
+  ?mint skos:prefLabel ?label.
+          FILTER langMatches(lang(?label), "en") 
+        FILTER ( ?date >= "1138"^^xsd:gYear && ?date <= "1350"^^xsd:gYear ) .
+  }  
+}
+}
+
+--subquery mit type in englisch und ohne link
+
+SELECT ?objects ?label2 ?weight
+WHERE {
+?objects nmo:hasTypeSeriesItem ?type;
+    nmo:hasWeight ?weight.
+?type skos:prefLabel ?label2.
+FILTER langMatches(lang(?label2), "en") 
+
+{
+  SELECT ?type 
+  WHERE {
+  ?type dcterms:source nm:oscar;
+        nmo:hasStartDate ?date;
+        nmo:hasMint ?mint.
+  ?mint skos:prefLabel ?label.
+	FILTER langMatches(lang(?label), "en")
+	FILTER ( ?date >= "1138"^^xsd:gYear && ?date <= "1350"^^xsd:gYear ) .
+  }  
+}
+}
+
+--alle Typen mit stardate UND enddate im Zeitrahmen --> schränkt Typen weiter ein; nicht hilfreich
+
+SELECT DISTINCT ?type ?mint ?startdate ?enddate 
+WHERE {
+?type dcterms:source nm:oscar;
+	nmo:hasStartDate ?startdate;
+      	nmo:hasMint ?mint.
+OPTIONAL {?type nmo:hasEndDate ?enddate}
+?mint skos:prefLabel ?label.
+	FILTER langMatches(lang(?label), "en") 
+    	FILTER ( ?startdate >= "1138"^^xsd:gYear && ?startdate <= "1350"^^xsd:gYear ) .
+  	FILTER ( ?enddate >= "1138"^^xsd:gYear && ?enddate <= "1350"^^xsd:gYear ) .
+  } ORDER BY ?startdate 
+
+#alle typen mit startdate UND enddate im Zeitrahmen -- nicht eingeschränkt; ist das richtig? 
+
+SELECT DISTINCT ?type ?mint ?startdate ?enddate
+WHERE {
+	{	
+  ?type dcterms:source nm:oscar;
+	nmo:hasStartDate ?startdate;
+    	nmo:hasMint ?mint.
+  	?mint skos:prefLabel ?label.
+FILTER langMatches(lang(?label), "en") 
+FILTER ( ?startdate >= "1138"^^xsd:gYear && ?startdate <= "1350"^^xsd:gYear ) .
+	}
+UNION {
+  	?type dcterms:source nm:oscar;
+	nmo:hasEndDate ?enddate;
+    	nmo:hasMint ?mint.
+  	?mint skos:prefLabel ?label.
+FILTER langMatches(lang(?label), "en") 
+FILTER ( ?enddate >= "1138"^^xsd:gYear && ?enddate <= "1350"^^xsd:gYear ) .
+	}
+}
+
+--alles zusammen
+
+SELECT ?objects ?label2 ?weight
+WHERE {
+?objects nmo:hasTypeSeriesItem ?type;
+    nmo:hasWeight ?weight.
+?type skos:prefLabel ?label2.
+FILTER langMatches(lang(?label2), "en") 
+{
+	  SELECT DISTINCT ?type 
+	WHERE {
+		{	
+	  ?type dcterms:source nm:oscar;
+		nmo:hasStartDate ?startdate;
+	    	nmo:hasMint ?mint.
+	  	?mint skos:prefLabel ?label.
+	FILTER langMatches(lang(?label), "en") 
+	FILTER ( ?startdate >= "1138"^^xsd:gYear && ?startdate <= "1350"^^xsd:gYear ) .
+		}
+	UNION {
+	  	?type dcterms:source nm:oscar;
+		nmo:hasEndDate ?enddate;
+	    	nmo:hasMint ?mint.
+	  	?mint skos:prefLabel ?label.
+	FILTER langMatches(lang(?label), "en") 
+	FILTER ( ?enddate >= "1138"^^xsd:gYear && ?enddate <= "1350"^^xsd:gYear ) .
+		}
+}
+}
+}
+
+#mit authority --> GEHT NICHT
+
+PREFIX crm:  <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX dcterms:  <http://purl.org/dc/terms/>
+PREFIX dcmitype:  <http://purl.org/dc/dcmitype/>
+PREFIX foaf:  <http://xmlns.com/foaf/0.1/>
+PREFIX geo:  <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX nm:  <http://nomisma.org/id/>
+PREFIX nmo:  <http://nomisma.org/ontology#>
+PREFIX org:  <http://www.w3.org/ns/org#>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos:  <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?objects ?label2 ?auth ?weight
+WHERE {
+?objects nmo:hasTypeSeriesItem ?type;
+         nmo:hasAuthority ?auth;
+    nmo:hasWeight ?weight.
+?type skos:prefLabel ?label2.
+FILTER langMatches(lang(?label2), "en") 
+{
+	  SELECT DISTINCT ?type 
+	WHERE {
+		{	
+	  ?type dcterms:source nm:oscar;
+		nmo:hasStartDate ?startdate;
+	    	nmo:hasMint ?mint.
+	  	?mint skos:prefLabel ?label.
+	FILTER langMatches(lang(?label), "en") 
+	FILTER ( ?startdate >= "1138"^^xsd:gYear && ?startdate <= "1350"^^xsd:gYear ) .
+		}
+	UNION {
+	  	?type dcterms:source nm:oscar;
+		nmo:hasEndDate ?enddate;
+	    	nmo:hasMint ?mint.
+	  	?mint skos:prefLabel ?label.
+	FILTER langMatches(lang(?label), "en") 
+	FILTER ( ?enddate >= "1138"^^xsd:gYear && ?enddate <= "1350"^^xsd:gYear ) .
+		}
+}
+}
+}
+

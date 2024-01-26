@@ -1,0 +1,36 @@
+SPARQL
+	Subqueries
+		https://en.m.wikibooks.org/wiki/SPARQL/Subqueries
+	UNION
+		https://jena.apache.org/tutorials/sparql_union.html
+		https://en.m.wikibooks.org/wiki/SPARQL/UNION
+
+Sehr geehrter Dr. Wallnig, sehr geehrter Herr Weidgennant,
+
+vielen Dank für Ihre schnelle Antwort! Ja, das war eh ein bisschen meine Befürchtung. Ich habe gerade noch einmal auf der Website von Oscar herumgeschaut, um eventuell eine Mailadresse für Rückfragen zu finden, und habe dabei unter dem Reiter API eine Auflistung aller abfragbaren Properties gefunden, Authority war nicht dabei [https://oscar.nationalmuseum.ch/apis]. Allerdings dort aufgeführt sind die Properties Issuer und State (unter anderem), die lt. OSCAR also abfragbar sein sollten. Weder im .ttl File [https://oscar.nationalmuseum.ch/id/oscar.3071.ttl] noch im .rdf File [https://oscar.nationalmuseum.ch/id/oscar.3071.rdf] sind diese Daten zu finden, sehr wohl aber im NUDS .xml File [https://oscar.nationalmuseum.ch/id/oscar.3071.xml], hier eben unter typeDescription/authority/persname bzw. corpsname, wie in der NUDS Reference vorgesehen [https://nomisma.org/nuds#authority].
+
+Zumindest Issuer ist nicht nur als Concept in Nomisma, sondern hat eine eigene Property Relation in der Ontologie, nämlich hasIssuer [https://nomisma.hypotheses.org/2069]. Fragt man allerdings danach kommen erneut keine Ergebnisse                 
+
+    https://gist.github.com/ManuelBeisser/76ce079be71661c19960452829de86cd
+
+Bei dieser Query ist das hasIssuer herauskommentiert, ohne taucht oscar.3071 relativ weit oben auf; mit gibt es keine Ergebnisse. 
+
+OpenRefine
+	Duplicates finden dank 
+
+ 
+Warum sind start und enddate teilweise so verwirrend? --> Bsp. https://oscar.nationalmuseum.ch/id/oscar.137 NUDS vs RDF Text vs Data Schwierigkeit
+
+OpenRefine and Calc
+zuerst OR turn into records; turn link into string_type
+dann test_1 --> ist record ja/nein
+dann Enddaten 1 höher
+dann OR sort by 2/1; make permanent --> nur erste Record Zeile
+--> 352 Records left
+Calc startdate sort asc --> aufsteigende Liste aller prägungen
+Prägedauer Enddate-Startdate
+VLOOKUP um Type und Dates zu matchen
+??? Pivot Table geht nicht???
+
+QGIS
+https://www.swisstopo.admin.ch/de/landschaftsmodell-swissboundaries3d
