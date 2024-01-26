@@ -82,7 +82,7 @@ SELECT ?type ?mint ?date WHERE {
 
 #diskrepanz durch start vs. endDate?
 
---find all authorities - geht nicht
+#find all authorities - geht nicht
 SELECT ?label (count(?auth) as ?count) WHERE {
 ?type dcterms:source nm:oscar ;
   nmo:hasAuthority ?auth .
